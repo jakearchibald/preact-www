@@ -2,6 +2,7 @@ import { h, Component } from 'preact';
 import { Router } from 'preact-router';
 import config from '../config.json';
 import controllers from './controllers';
+import style from './style';
 
 let { pushState } = history;
 history.pushState = (a, b, url) => {
@@ -81,6 +82,11 @@ export default class Routes extends Component {
 	render({ url }) {
 		return (
 			<main>
+				<div class={style.justADemo}>
+					This is just a demo of shared element transitions, not the real Preact
+					site. If you actually want Preact docs, go to{' '}
+					<a href="https://preactjs.com/">the real site</a>.
+				</div>
 				<Router url={url} onChange={this.handleRoute}>
 					{this.getNavRoutes(config.docs)}
 					{this.getNavRoutes(config.nav)}

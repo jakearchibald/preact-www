@@ -16,6 +16,8 @@ import {
 import { isDocPage } from '../../../lib/docs';
 import { useStore } from '../../store-adapter';
 import { AVAILABLE_DOCS } from '../../doc-version';
+import headerStyle from '../../../components/header/style';
+import warningStyle from '../../style';
 
 const getContentId = route => route.content || route.path;
 
@@ -43,6 +45,9 @@ export function useDescription(text) {
 		}
 	}, [text]);
 }
+
+let firstPage = true;
+let lastStep = 0;
 
 export function usePage(route, lang) {
 	// on the server, pass data down through the tree to avoid repeated FS lookups
@@ -97,23 +102,63 @@ export function usePage(route, lang) {
 		// Don't show loader forever in case of an error
 		if (!meta) return;
 
-		setContent(content);
-		setMeta(meta);
-		setHtml(html);
-		setLoading(false);
-		setFallback(fallback);
-		const current = getContentId(route);
-		const bootData = getPrerenderData(current);
-		setHydrated(!!bootData);
-		setCurrent(current);
-		// content was loaded. if this was a forward route transition, animate back to top
-		if (window.nextStateToTop) {
-			window.nextStateToTop = false;
-			scrollTo({
-				top: 0,
-				left: 0
-			});
+		const getSharedElements = () =>
+			[
+				document.querySelector('.' + headerStyle.header),
+				document.querySelector('.' + style.sidebarWrap),
+				document.querySelector('.' + warningStyle.justADemo)
+			].map(el =>
+				el && el.getBoundingClientRect().width > 0 ? el : undefined
+			);
+
+		const setPageState = () => {
+			setContent(content);
+			setMeta(meta);
+			setHtml(html);
+			setLoading(false);
+			setFallback(fallback);
+			const current = getContentId(route);
+			const bootData = getPrerenderData(current);
+			setHydrated(!!bootData);
+			setCurrent(current);
+			// content was loaded. if this was a forward route transition, animate back to top
+			if (window.nextStateToTop) {
+				window.nextStateToTop = false;
+				scrollTo({
+					top: 0,
+					left: 0
+				});
+			}
+		};
+
+		const isBack = history.state && history.state.step < lastStep;
+
+		if (!history.state) {
+			history.replaceState({ step: lastStep + 1 }, '', '');
 		}
+
+		lastStep = history.state.step;
+
+		if (firstPage) {
+			setPageState();
+			firstPage = false;
+			return;
+		}
+
+		document.documentTransition
+			.prepare({
+				rootTransition: isBack ? 'cover-right' : 'cover-left',
+				sharedElements: getSharedElements()
+			})
+			.then(async () => {
+				setPageState();
+
+				// Wait until frame
+				await new Promise(resolve => requestAnimationFrame(resolve));
+				document.documentTransition.start({
+					sharedElements: getSharedElements()
+				});
+			});
 	}
 
 	return {
