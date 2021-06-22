@@ -160,7 +160,7 @@ export function usePage(route, lang) {
 			.prepare({
 				rootTransition:
 					lastPath === '/'
-						? 'cover-down'
+						? 'reveal-down'
 						: location.pathname === '/'
 						? 'cover-up'
 						: isBack
