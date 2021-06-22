@@ -24,31 +24,43 @@ export default function Header() {
 	}, [url]);
 
 	return (
-		<header class={cx(style.header, open && style.open)}>
-			<div class={style.inner}>
-				<Nav class={style.nav} routes={config.nav} current={url} />
-				<Search />
-				<div class={style.social}>
-					<ReleaseLink class={cx(style.socialItem, style.release)} />
-					<a
-						class={style.socialItem}
-						aria-label="Browse the code on GitHub"
-						href="https://github.com/preactjs/preact"
-					>
-						<img src="/assets/github.svg" alt="GitHub" width="34" height="33" />
-					</a>
-					<a
-						class={style.socialItem}
-						aria-label="Follow us on Twitter"
-						href="https://twitter.com/preactjs"
-					>
-						<img src="/assets/twitter.svg" alt="Twitter" width="34" height="28" />
-					</a>
+		<>
+			<header class={cx(style.header, open && style.open)}>
+				<div class={style.inner}>
+					<Nav class={style.nav} routes={config.nav} current={url} />
+					<Search />
+					<div class={style.social}>
+						<ReleaseLink class={cx(style.socialItem, style.release)} />
+						<a
+							class={style.socialItem}
+							aria-label="Browse the code on GitHub"
+							href="https://github.com/preactjs/preact"
+						>
+							<img
+								src="/assets/github.svg"
+								alt="GitHub"
+								width="34"
+								height="33"
+							/>
+						</a>
+						<a
+							class={style.socialItem}
+							aria-label="Follow us on Twitter"
+							href="https://twitter.com/preactjs"
+						>
+							<img
+								src="/assets/twitter.svg"
+								alt="Twitter"
+								width="34"
+								height="28"
+							/>
+						</a>
+					</div>
+					<Hamburger open={open} onClick={toggle} />
 				</div>
-				<Hamburger open={open} onClick={toggle} />
-				<Corner />
-			</div>
-		</header>
+			</header>
+			<Corner />
+		</>
 	);
 }
 

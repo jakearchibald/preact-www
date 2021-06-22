@@ -17,6 +17,7 @@ import { isDocPage } from '../../../lib/docs';
 import { useStore } from '../../store-adapter';
 import { AVAILABLE_DOCS } from '../../doc-version';
 import headerStyle from '../../../components/header/style';
+import cornerStyle from '../../../components/header/corner.less';
 import warningStyle from '../../style';
 
 const getContentId = route => route.content || route.path;
@@ -48,6 +49,7 @@ export function useDescription(text) {
 
 let firstPage = true;
 let lastStep = 0;
+let lastPath = location.pathname;
 
 export function usePage(route, lang) {
 	// on the server, pass data down through the tree to avoid repeated FS lookups
@@ -104,12 +106,15 @@ export function usePage(route, lang) {
 
 		const getSharedElements = () =>
 			[
-				document.querySelector('.' + headerStyle.header),
-				document.querySelector('.' + style.sidebarWrap),
-				document.querySelector('.' + warningStyle.justADemo)
-			].map(el =>
-				el && el.getBoundingClientRect().width > 0 ? el : undefined
-			);
+				headerStyle.header,
+				style.sidebarWrap,
+				warningStyle.justADemo,
+				cornerStyle.corner
+			]
+				.map(className => document.querySelector('.' + className))
+				.map(el =>
+					el && el.getBoundingClientRect().width > 0 ? el : undefined
+				);
 
 		const setPageState = () => {
 			setContent(content);
@@ -145,19 +150,41 @@ export function usePage(route, lang) {
 			return;
 		}
 
+		const initalSharedElements = getSharedElements();
+
+		for (const el of initalSharedElements) {
+			if (el) el.style.contain = 'paint';
+		}
+
 		document.documentTransition
 			.prepare({
-				rootTransition: isBack ? 'cover-right' : 'cover-left',
-				sharedElements: getSharedElements()
+				rootTransition:
+					lastPath === '/'
+						? 'cover-down'
+						: location.pathname === '/'
+						? 'cover-up'
+						: isBack
+						? 'cover-right'
+						: 'cover-left',
+				sharedElements: initalSharedElements
 			})
 			.then(async () => {
 				setPageState();
 
 				// Wait until frame
 				await new Promise(resolve => requestAnimationFrame(resolve));
-				document.documentTransition.start({
-					sharedElements: getSharedElements()
-				});
+
+				const sharedElements = getSharedElements();
+
+				try {
+					await document.documentTransition.start({ sharedElements });
+				} finally {
+					for (const el of initalSharedElements) {
+						if (el) el.style.contain = 'none';
+					}
+				}
+
+				lastPath = location.pathname;
 			});
 	}
 
