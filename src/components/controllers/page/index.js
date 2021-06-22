@@ -144,7 +144,7 @@ export function usePage(route, lang) {
 
 		lastStep = history.state.step;
 
-		if (firstPage) {
+		if (firstPage || !document.documentTransition) {
 			setPageState();
 			firstPage = false;
 			return;
