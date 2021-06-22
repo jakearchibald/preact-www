@@ -86,6 +86,14 @@ export default class Routes extends Component {
 					This is just a demo of shared element transitions, not the real Preact
 					site. If you actually want Preact docs, go to{' '}
 					<a href="https://preactjs.com/">the real site</a>.
+					{!('documentTransition' in document) && (
+						<strong>
+							{' '}
+							This browser doesn't seem to support shared element transitions.
+							In Chromium browsers, you can enable it in
+							about://flags/#document-transition
+						</strong>
+					)}
 				</div>
 				<Router url={url} onChange={this.handleRoute}>
 					{this.getNavRoutes(config.docs)}
